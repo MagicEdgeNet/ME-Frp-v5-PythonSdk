@@ -49,7 +49,7 @@ func (c *Client) DeleteProxy(proxyID int) error {
 }
 
 // UpdateProxy updates an existing proxy
-func (c *Client) UpdateProxy(req CreateProxyRequest) error {
+func (c *Client) UpdateProxy(req UpdateProxyRequest) error {
 	var resp Response[any]
 	err := c.request("POST", "/auth/proxy/update", req, &resp)
 	if err != nil {

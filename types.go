@@ -136,6 +136,22 @@ type CreateProxyRequest struct {
 	HeaderXFromWhere     string `json:"headerXFromWhere,omitempty"`
 }
 
+// UpdateProxyRequest represents the request to update a proxy
+type UpdateProxyRequest struct {
+	Domain               *string `json:"domain"`
+	HeaderXFromWhere     *string `json:"headerXFromWhere"`
+	HostHeaderRewrite    *string `json:"hostHeaderRewrite"`
+	LocalIP              string  `json:"localIp"`
+	LocalPort            int64   `json:"localPort"`
+	NodeID               int64   `json:"nodeId"`
+	ProxyName            string  `json:"proxyName"`
+	ProxyProtocolVersion *string `json:"proxyProtocolVersion"`
+	ProxyType            string  `json:"proxyType"`
+	RemotePort           int64   `json:"remotePort"`
+	UseCompression       bool    `json:"useCompression"`
+	UseEncryption        bool    `json:"useEncryption"`
+}
+
 // ToggleProxyRequest represents the request to toggle a proxy
 type ToggleProxyRequest struct {
 	ProxyID    int  `json:"proxyId"`
