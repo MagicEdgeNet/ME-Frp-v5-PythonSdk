@@ -5,7 +5,7 @@ ME Frp 5.0 官方 Go 语言 SDK，提供完整的 API 封装。
 ## 安装
 
 ```bash
-go get github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk
+go get github.com/MagicEdgeNet/MEFrp-v5-GolangSdk
 ```
 
 ## 快速开始
@@ -19,7 +19,7 @@ import (
 "fmt"
 "log"
 
-"github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk"
+"github.com/MagicEdgeNet/MEFrp-v5-GolangSdk"
 )
 
 func main() {
@@ -65,7 +65,7 @@ import (
 "fmt"
 "log"
 
-"github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk"
+"github.com/MagicEdgeNet/MEFrp-v5-GolangSdk"
 )
 
 func main() {
@@ -105,7 +105,7 @@ import (
 "fmt"
 "log"
 
-"github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk"
+"github.com/MagicEdgeNet/MEFrp-v5-GolangSdk"
 )
 
 func main() {
@@ -170,7 +170,7 @@ import (
 "fmt"
 "log"
 
-"github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk"
+"github.com/MagicEdgeNet/MEFrp-v5-GolangSdk"
 )
 
 func main() {
@@ -207,7 +207,7 @@ import (
 "fmt"
 "log"
 
-"github.com/MagicEdgeNet/MEFrp-v5-Golang-Sdk"
+"github.com/MagicEdgeNet/MEFrp-v5-GolangSdk"
 )
 
 func main() {
