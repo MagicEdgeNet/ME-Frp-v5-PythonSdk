@@ -1,4 +1,4 @@
-package mefrp
+package mefrpApi
 
 import "fmt"
 
@@ -21,6 +21,21 @@ func (c *Client) GetSystemStatus() (*SystemStatus, error) {
 func (c *Client) GetPopupNotice() (string, error) {
 	var resp Response[string]
 	err := c.request("GET", "/auth/popupNotice", nil, &resp)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.Code != 200 {
+		return "", fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
+	}
+
+	return resp.Data, nil
+}
+
+// GetNotice retrieves the system notice
+func (c *Client) GetNotice() (string, error) {
+	var resp Response[string]
+	err := c.request("GET", "/auth/notice", nil, &resp)
 	if err != nil {
 		return "", err
 	}

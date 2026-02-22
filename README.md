@@ -112,11 +112,11 @@ func main() {
     client := mefrp.NewClient("YOUR_API_TOKEN")
 
     // 获取隧道列表
-    proxies, err := client.GetProxyList()
+    resp, err := client.GetProxyList()
     if err != nil {
         log.Fatal(err)
     }
-    for _, t := range proxies {
+    for _, t := range resp.Proxies {
         status := "Offline"
         if t.IsOnline {
             status = "Online"
@@ -238,10 +238,16 @@ func main() {
 
 - `GetStatistics()` - 获取平台统计信息
 - `GetStoreItems()` - 获取商城商品列表
+- `GetHolidayData(year)` - 获取节假日数据
+- `CheckUpdate(req)` - 检查软件更新
 - `GetRegisterEmailCode(email, captchaToken)` - 获取注册验证码
 - `Register(req)` - 注册账户
 - `Login(req)` - 密码登录
-- `RecoverAccount(req)` - 找回账户
+- `GenerateMagicLink(req)` - 生成免密登录链接
+- `VerifyMagicLink(mid)` - 验证免密登录链接
+- `RequestIForgotEmailCode(req)` - 请求找回密码验证码
+- `IForgot(req)` - 找回密码
+- `GetPublicAdsByPlacement(placement)` - 获取公共广告
 
 ### 用户相关
 
@@ -251,8 +257,17 @@ func main() {
 - `GetUserGroups()` - 获取用户组信息
 - `ResetAccessKey(captchaToken)` - 重置访问密钥
 - `ChangePassword(req)` - 修改密码
-- `GetUserLogs(page, pageSize, startTime, endTime)` - 获取操作日志
+- `GetUserLogs(filter)` - 获取操作日志
 - `GetUserLogStats()` - 获取日志统计
+- `GetRealnameInfo()` - 获取实名认证信息
+- `PerformRealnameLegacy(req)` - 执行实名认证
+- `GetUserTrafficStats(datePeriod)` - 获取流量统计
+- `GetUserIcpDomain()` - 获取已备案域名列表
+- `AddIcpDomain(domain)` - 添加域名备案
+- `DeleteIcpDomain(domain)` - 删除域名备案
+- `KickAllProxies()` - 强制下线所有隧道
+- `GetPurchaseStatus()` - 获取购买状态
+- `GetOperationLogCategories()` - 获取操作日志分类
 
 ### 隧道相关
 
@@ -264,29 +279,89 @@ func main() {
 - `ToggleProxy(proxyID, isDisabled)` - 启用/禁用隧道
 - `GetProxyConfig(proxyID, format)` - 获取单一隧道配置
 - `GetMultipleProxyConfigs(proxyIDs, format)` - 获取多个隧道配置
+- `GetEasyStartupConfig(proxyID)` - 获取快速启动配置
+- `GetCreateProxyData()` - 获取创建隧道所需数据
 
 ### 节点相关
 
 - `GetNodeList()` - 获取节点列表
+- `GetNodeFreePort(nodeID, protocol)` - 获取节点空闲端口
 - `GetNodeStatus()` - 获取节点状态
 - `GetNodeToken(nodeID)` - 获取节点 Token
 - `GetNodeConnectionList()` - 获取节点连接地址
+
+### 广告系统
+
+- `GetUserAds()` - 获取我的广告
+- `GetAdsByPlacement(placement, slotID)` - 查询广告
+- `AddAd(ad)` - 添加广告
+- `UpdateAd(ad)` - 更新广告
+- `DeleteAd(adsID)` - 删除广告
+- `RenewAd(adsID)` - 续费广告
+- `TrackAdClick(adsID)` - 追踪广告点击
+- `GetAvailableAdSlots()` - 获取可用广告位
+- `GetUserAdCredits()` - 获取广告额度
+- `ApplyAd(ad)` - 申请广告
+- `GetUserAdsStats()` - 获取广告统计
+- `GetAdSlotByPlacement(placement)` - 获取广告位信息
+- `ValidateCoupon(code, productType, orderAmount)` - 验证优惠券
+- `PurchaseAdCredits(slotID, amount)` - 购买广告额度
+
+### 财务与 CDK
+
+- `GetOrders(page, pageSize, status)` - 获取订单列表
+- `RepayOrder(orderID, payMethod, force)` - 重新支付订单
+- `SubmitOrder(req)` - 提交订单
+- `QueryOrder(orderID)` - 查询订单状态
+- `Proceed(orderID)` - 支付后处理
+- `RedeemCDK(code, captchaToken)` - 兑换 CDK
+- `GetMyCDKUsage(page, pageSize)` - 获取 CDK 使用记录
+
+### 节点捐赠
+
+- `ApplyNodeDonate(donate)` - 申请节点捐赠
+- `GetUserNodeDonates()` - 获取我的捐赠列表
+- `ApplyNodeDelete(nodeID, reason)` - 申请删除捐赠节点
+- `GetUserNodeDeleteRequests()` - 获取删除申请列表
+- `ApplyNodeEdit(req)` - 申请编辑捐赠节点
+- `GetUserNodeEditRequests()` - 获取编辑申请列表
+- `GetInstallScript(nodeID, system, arch, nodeType)` - 获取安装脚本
 
 ### 系统相关
 
 - `GetSystemStatus()` - 获取系统状态
 - `GetPopupNotice()` - 获取重要公告
+- `GetNotice()` - 获取系统公告
+- `GetDownloadSources()` - 获取下载源列表
+- `GetProducts()` - 获取产品列表
 
 ## 配置选项
+
+### 初始化选项
 
 ```go
 import "time"
 
 client := mefrp.NewClient("token",
-mefrp.WithTimeout(30 * time.Second),
-mefrp.WithBaseURL("https://api.mefrp.com/api"),
-mefrp.WithUserAgent("MyApp/1.0"),
+    mefrp.WithTimeout(30 * time.Second),
+    mefrp.WithBaseURL("https://api.mefrp.com/api"),
+    mefrp.WithUserAgent("MyApp/1.0"),
 )
+```
+
+### 动态修改配置
+
+您可以在客户端初始化后随时修改配置：
+
+```go
+// 修改 Endpoint
+client.SetBaseURL("https://your-proxy-api.com/api")
+
+// 修改 Token
+client.SetToken("NEW_API_TOKEN")
+
+// 修改 User-Agent
+client.SetUserAgent("NewAgent/2.0")
 ```
 
 ## 注意事项
@@ -322,8 +397,11 @@ mefrp.WithUserAgent("MyApp/1.0"),
 ```
 .
 ├── README.md           # 本文档
+├── ads.go              # 广告系统接口
 ├── auth.go             # 注册、登录、密码管理
+├── cash.go             # 财务、订单与 CDK 接口
 ├── client.go           # 核心 HTTP 客户端
+├── donate.go           # 节点捐赠接口
 ├── examples/           # 使用示例
 │   └── demo/
 │       └── main.go
@@ -334,6 +412,7 @@ mefrp.WithUserAgent("MyApp/1.0"),
 ├── proxy.go           # 隧道管理接口
 ├── types.go            # 数据结构定义
 └── user.go             # 用户信息接口
+└── version.go          # SDK 版本定义
 ```
 
 ## 贡献

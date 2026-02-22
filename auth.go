@@ -1,4 +1,4 @@
-package mefrp
+package mefrpApi
 
 import "fmt"
 
@@ -78,14 +78,82 @@ func (c *Client) Login(req LoginRequest) (string, error) {
 	return resp.Data.Token, nil
 }
 
-// RecoverAccountRequest represents the account recovery request
-type RecoverAccountRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+// GenerateMagicLinkRequest represents the magic link generation request
+type GenerateMagicLinkRequest struct {
+	User         string `json:"user"`
+	Callback     string `json:"callback"`
+	CaptchaToken string `json:"captchaToken"`
 }
 
-// RecoverAccount recovers/resets an account
-func (c *Client) RecoverAccount(req RecoverAccountRequest) error {
+// GenerateMagicLink requests a magic login link to be sent to the user's email
+func (c *Client) GenerateMagicLink(req GenerateMagicLinkRequest) error {
+	var resp Response[any]
+	err := c.request("POST", "/public/mlogin/link", req, &resp)
+	if err != nil {
+		return err
+	}
+
+	if resp.Code != 200 {
+		return fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
+	}
+
+	return nil
+}
+
+// VerifyMagicLinkResponse represents the magic link verification response
+type VerifyMagicLinkResponse struct {
+	Token    string `json:"token"`
+	Username string `json:"username"`
+	Group    string `json:"group"`
+}
+
+// VerifyMagicLink verifies a magic link ID and returns user information and token
+func (c *Client) VerifyMagicLink(mid string) (*VerifyMagicLinkResponse, error) {
+	var resp Response[VerifyMagicLinkResponse]
+	err := c.request("GET", "/public/mlogin/verify?mid="+mid, nil, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Code != 200 {
+		return nil, fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
+	}
+
+	// Update client token for subsequent requests
+	c.token = resp.Data.Token
+	return &resp.Data, nil
+}
+
+// RequestIForgotEmailCodeRequest represents the request for a password recovery email code
+type RequestIForgotEmailCodeRequest struct {
+	Email        string `json:"email"`
+	CaptchaToken string `json:"captchaToken"`
+}
+
+// RequestIForgotEmailCode requests a password recovery email code
+func (c *Client) RequestIForgotEmailCode(req RequestIForgotEmailCodeRequest) error {
+	var resp Response[any]
+	err := c.request("POST", "/public/iforgot/emailCode", req, &resp)
+	if err != nil {
+		return err
+	}
+
+	if resp.Code != 200 {
+		return fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
+	}
+
+	return nil
+}
+
+// IForgotRequest represents the password recovery request
+type IForgotRequest struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	EmailCode string `json:"emailCode"`
+}
+
+// IForgot resets the user's password using an email code
+func (c *Client) IForgot(req IForgotRequest) error {
 	var resp Response[any]
 	err := c.request("POST", "/public/iforgot", req, &resp)
 	if err != nil {

@@ -1,4 +1,4 @@
-package mefrp
+package mefrpApi
 
 import "fmt"
 
@@ -12,6 +12,26 @@ func (c *Client) GetNodeList() ([]Node, error) {
 
 	if resp.Code != 200 {
 		return nil, fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
+	}
+
+	return resp.Data, nil
+}
+
+// GetNodeFreePort retrieves a free port for a specific node and protocol
+func (c *Client) GetNodeFreePort(nodeID int64, protocol string) (int32, error) {
+	req := struct {
+		NodeID   int64  `json:"nodeId"`
+		Protocol string `json:"protocol"`
+	}{NodeID: nodeID, Protocol: protocol}
+
+	var resp Response[int32]
+	err := c.request("POST", "/auth/node/freePort", req, &resp)
+	if err != nil {
+		return 0, err
+	}
+
+	if resp.Code != 200 {
+		return 0, fmt.Errorf("api error: %s (code: %d)", resp.Message, resp.Code)
 	}
 
 	return resp.Data, nil
@@ -33,9 +53,9 @@ func (c *Client) GetNodeStatus() ([]NodeStatus, error) {
 }
 
 // GetNodeToken retrieves the token for a specific node
-func (c *Client) GetNodeToken(nodeID int) (*NodeToken, error) {
+func (c *Client) GetNodeToken(nodeID int64) (*NodeToken, error) {
 	req := struct {
-		NodeID int `json:"nodeId"`
+		NodeID int64 `json:"nodeId"`
 	}{NodeID: nodeID}
 
 	var resp Response[NodeToken]

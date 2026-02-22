@@ -1,4 +1,4 @@
-package mefrp
+package mefrpApi
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ func NewClient(token string, opts ...Option) *Client {
 		},
 		token:     token,
 		baseURL:   BaseURL,
-		userAgent: "MEFrp-Golang-SDK/1.0.0",
+		userAgent: "MEFrp-Golang-SDK/" + Version,
 	}
 
 	for _, opt := range opts {
@@ -55,6 +55,21 @@ func NewClient(token string, opts ...Option) *Client {
 	}
 
 	return c
+}
+
+// SetBaseURL updates the base URL for the client
+func (c *Client) SetBaseURL(url string) {
+	c.baseURL = url
+}
+
+// SetToken updates the authentication token for the client
+func (c *Client) SetToken(token string) {
+	c.token = token
+}
+
+// SetUserAgent updates the user agent for the client
+func (c *Client) SetUserAgent(userAgent string) {
+	c.userAgent = userAgent
 }
 
 func (c *Client) request(method, path string, body interface{}, v interface{}) error {
