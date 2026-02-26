@@ -1,9 +1,17 @@
-from .client_async import AsyncMEFrpClient
-from .client_sync import MEFrpClient
+try:
+    from .client_async import AsyncMEFrpClient
+except ImportError:
+    AsyncMEFrpClient = None  # type: ignore
+
+try:
+    from .client_sync import MEFrpClient
+except ImportError:
+    MEFrpClient = None  # type: ignore
+
 from .exceptions import APIError, AuthError, MEFrpError, NetworkError
 from .models import *
 
-__version__ = "0.1.0"
+__version__ = "3.1.0"
 __all__ = [
     "MEFrpClient",
     "AsyncMEFrpClient",
