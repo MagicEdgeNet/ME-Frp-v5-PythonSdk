@@ -11,7 +11,7 @@ except ImportError:
 from .exceptions import APIError, AuthError, MEFrpError, NetworkError
 from .models import *
 
-__version__ = "3.1.0"
+__version__ = "3.2.0"
 __all__ = [
     "MEFrpClient",
     "AsyncMEFrpClient",

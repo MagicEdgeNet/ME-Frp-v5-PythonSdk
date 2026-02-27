@@ -22,6 +22,12 @@ class UserInfo:
 
 
 @dataclass
+class SystemStatus:
+    status: int
+    remark: str
+
+
+@dataclass
 class Proxy:
     proxyId: int
     username: str
@@ -67,6 +73,19 @@ class NodeConnection:
 class ProxyListResponse:
     proxies: List[Proxy]
     nodes: List[NodeConnection]
+
+
+@dataclass
+class CreateProxyDataResponse:
+    nodes: List[Dict]
+    groups: List["UserGroup"]
+    currentGroup: str
+
+
+@dataclass
+class ProxyConfigResponse:
+    config: str
+    type: str
 
 
 @dataclass
@@ -159,6 +178,14 @@ class OperationLogList:
     page: int
     pageSize: int
     totalPages: int
+
+
+@dataclass
+class OperationLogStats:
+    monthCount: int
+    todayCount: int
+    totalCount: int
+    weekCount: int
 
 
 @dataclass
@@ -271,3 +298,10 @@ class EasyStartProxy:
     nodeAddr: str
     nodePort: int
     nodeToken: str
+
+
+@dataclass
+class NodeNameListItem:
+    nodeId: int
+    name: str
+    hostname: str

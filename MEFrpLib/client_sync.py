@@ -62,14 +62,31 @@ class MEFrpClient(BaseClient):
             self.set_token(data["token"])
         return data
 
+    def forgot_password(self, username: str, email: str):
+        return self._request("POST", "/public/iforgot", {"username": username, "email": email})
+
     def get_statistics(self) -> Statistics:
         data = self._request("GET", "/public/statistics")
         return Statistics(**data)
+
+    def get_popup_notice(self) -> str:
+        return self._request("GET", "/auth/popupNotice")
+
+    def get_notice(self) -> List[str]:
+        return self._request("GET", "/auth/notice")
+
+    def get_system_status(self) -> SystemStatus:
+        data = self._request("GET", "/auth/system/status")
+        return SystemStatus(**data)
 
     # --- User API ---
     def get_user_info(self) -> UserInfo:
         data = self._request("GET", "/auth/user/info")
         return UserInfo(**data)
+
+    def get_frp_token(self) -> str:
+        data = self._request("GET", "/auth/user/frpToken")
+        return data.get("frpToken") if isinstance(data, dict) else data
 
     def sign(self, captcha_token: str):
         return self._request("POST", "/auth/user/sign", {"captchaToken": captcha_token})
@@ -77,6 +94,16 @@ class MEFrpClient(BaseClient):
     def get_user_groups(self) -> List[UserGroup]:
         data = self._request("GET", "/auth/user/groups")
         return [UserGroup(**g) for g in data]
+
+    def reset_token(self, captcha_token: str):
+        return self._request("POST", "/auth/user/tokenReset", {"captchaToken": captcha_token})
+
+    def reset_password(self, old_password: str, new_password: str):
+        return self._request(
+            "POST",
+            "/auth/user/passwordReset",
+            {"oldPassword": old_password, "newPassword": new_password},
+        )
 
     # --- Proxy API ---
     def get_proxy_list(self) -> ProxyListResponse:
@@ -100,14 +127,31 @@ class MEFrpClient(BaseClient):
     def toggle_proxy(self, proxy_id: int):
         return self._request("POST", "/auth/proxy/toggle", {"proxyId": proxy_id})
 
+    def get_proxy_config(self, proxy_id: int, format: str = "ini") -> ProxyConfigResponse:
+        data = self._request("POST", "/auth/proxy/config", {"proxyId": proxy_id, "format": format})
+        return ProxyConfigResponse(**data)
+
     # --- Node API ---
     def get_node_list(self) -> List[Node]:
         data = self._request("GET", "/auth/node/list")
         return [Node(**n) for n in data]
 
+    def get_node_name_list(self) -> List[NodeNameListItem]:
+        data = self._request("GET", "/auth/node/nameList")
+        return [NodeNameListItem(**n) for n in data]
+
     def get_node_status(self, node_id: int) -> NodeStatus:
         data = self._request("GET", "/auth/node/status", params={"nodeId": node_id})
         return NodeStatus(**data)
+
+    def get_node_token(self, node_id: int) -> str:
+        data = self._request("POST", "/auth/node/secret", {"nodeId": node_id})
+        return data.get("token") if isinstance(data, dict) else data
+
+    def get_free_port(self, node_id: int, proxy_type: str):
+        return self._request(
+            "GET", "/auth/node/freePort", params={"nodeId": node_id, "proxyType": proxy_type}
+        )
 
     # --- Ads API ---
     def get_user_ads(self) -> List[Ads]:
@@ -153,6 +197,14 @@ class MEFrpClient(BaseClient):
             pageSize=data["pageSize"],
             totalPages=data["totalPages"],
         )
+
+    def get_operation_log_stats(self) -> OperationLogStats:
+        data = self._request("GET", "/auth/operationLog/stats")
+        return OperationLogStats(**data)
+
+    def get_create_proxy_data(self) -> CreateProxyDataResponse:
+        data = self._request("GET", "/auth/createProxyData")
+        return CreateProxyDataResponse(**data)
 
     # --- CDK API ---
     def redeem_cdk(self, code: str):

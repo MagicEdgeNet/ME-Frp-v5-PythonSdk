@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "MEFrpLib"
-version = "3.1.0"
+dynamic = ["version"]
 description = "ME Frp 5.0 Official Python SDK"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -40,6 +40,9 @@ Homepage = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk"
 Documentation = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk#readme"
 Repository = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk.git"
 Issues = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "MEFrpLib.__version__" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["MEFrpLib"]
