@@ -41,8 +41,8 @@ Documentation = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk#readme"
 Repository = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk.git"
 Issues = "https://github.com/MagicEdgeNet/ME-Frp-v5-PythonSdk/issues"
 
-[tool.setuptools.dynamic]
-version = { attr = "MEFrpLib.__version__" }
+[tool.hatch.version]
+path = "MEFrpLib/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["MEFrpLib"]

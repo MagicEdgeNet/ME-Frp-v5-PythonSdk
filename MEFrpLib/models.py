@@ -18,6 +18,8 @@ class UserInfo:
     inBound: int
     outBound: int
     todaySigned: bool
+    banReason: Optional[str] = None
+    realnameTimes: int = 0
     vipExpireTime: Optional[int] = None
 
 
@@ -59,7 +61,6 @@ class Proxy:
     httpUser: str
     httpPassword: str
     transportProtocol: str
-    tags: str
 
 
 @dataclass
@@ -73,19 +74,6 @@ class NodeConnection:
 class ProxyListResponse:
     proxies: List[Proxy]
     nodes: List[NodeConnection]
-
-
-@dataclass
-class CreateProxyDataResponse:
-    nodes: List[Dict]
-    groups: List["UserGroup"]
-    currentGroup: str
-
-
-@dataclass
-class ProxyConfigResponse:
-    config: str
-    type: str
 
 
 @dataclass
@@ -109,6 +97,26 @@ class Node:
     totalTrafficOut: int
     upTime: int
     version: str
+    donateId: int = 0
+    donateUser: str = ""
+
+
+@dataclass
+class NodeWithLoad(Node):
+    loadPercent: int = 0
+
+
+@dataclass
+class CreateProxyDataResponse:
+    nodes: List[NodeWithLoad]
+    groups: List["UserGroup"]
+    currentGroup: str
+
+
+@dataclass
+class ProxyConfigResponse:
+    config: str
+    type: str
 
 
 @dataclass
@@ -305,3 +313,22 @@ class NodeNameListItem:
     nodeId: int
     name: str
     hostname: str
+
+
+@dataclass
+class Product:
+    productId: str
+    system: str
+    arch: str
+    name: str
+    desc: str
+    path: str
+    version: str
+    isPublic: bool
+
+
+@dataclass
+class DownloadSource:
+    id: int
+    path: str
+    name: str

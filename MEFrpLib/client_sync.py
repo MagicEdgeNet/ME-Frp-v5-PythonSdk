@@ -72,7 +72,7 @@ class MEFrpClient(BaseClient):
     def get_popup_notice(self) -> str:
         return self._request("GET", "/auth/popupNotice")
 
-    def get_notice(self) -> List[str]:
+    def get_notice(self) -> str:
         return self._request("GET", "/auth/notice")
 
     def get_system_status(self) -> SystemStatus:
@@ -86,7 +86,7 @@ class MEFrpClient(BaseClient):
 
     def get_frp_token(self) -> str:
         data = self._request("GET", "/auth/user/frpToken")
-        return data.get("frpToken") if isinstance(data, dict) else data
+        return data.get("token") if isinstance(data, dict) else data
 
     def sign(self, captcha_token: str):
         return self._request("POST", "/auth/user/sign", {"captchaToken": captcha_token})
@@ -140,17 +140,17 @@ class MEFrpClient(BaseClient):
         data = self._request("GET", "/auth/node/nameList")
         return [NodeNameListItem(**n) for n in data]
 
-    def get_node_status(self, node_id: int) -> NodeStatus:
-        data = self._request("GET", "/auth/node/status", params={"nodeId": node_id})
-        return NodeStatus(**data)
+    def get_node_status(self) -> List[NodeStatus]:
+        data = self._request("GET", "/auth/node/status")
+        return [NodeStatus(**n) for n in data]
 
     def get_node_token(self, node_id: int) -> str:
         data = self._request("POST", "/auth/node/secret", {"nodeId": node_id})
         return data.get("token") if isinstance(data, dict) else data
 
-    def get_free_port(self, node_id: int, proxy_type: str):
+    def get_free_port(self, node_id: int, protocol: str):
         return self._request(
-            "GET", "/auth/node/freePort", params={"nodeId": node_id, "proxyType": proxy_type}
+            "POST", "/auth/node/freePort", {"nodeId": node_id, "protocol": protocol}
         )
 
     # --- Ads API ---
@@ -204,7 +204,20 @@ class MEFrpClient(BaseClient):
 
     def get_create_proxy_data(self) -> CreateProxyDataResponse:
         data = self._request("GET", "/auth/createProxyData")
-        return CreateProxyDataResponse(**data)
+        nodes = []
+        for n in data["nodes"]:
+            # 移除 NodeWithLoad 中多余的字段，确保能正确解包到 Node 基类
+            load_percent = n.pop("loadPercent", 0)
+            # 过滤掉 Node 类不接受的字段
+            import dataclasses
+            node_fields = {f.name for f in dataclasses.fields(Node)}
+            filtered_n = {k: v for k, v in n.items() if k in node_fields}
+            node_base = Node(**filtered_n)
+            nodes.append(NodeWithLoad(**node_base.__dict__, loadPercent=load_percent))
+        groups = [UserGroup(**g) for g in data["groups"]]
+        return CreateProxyDataResponse(
+            nodes=nodes, groups=groups, currentGroup=data["currentGroup"]
+        )
 
     # --- CDK API ---
     def redeem_cdk(self, code: str):

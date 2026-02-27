@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -104,7 +105,7 @@ class AsyncMEFrpClient(BaseClient):
     async def get_popup_notice(self) -> str:
         return await self._request("GET", "/auth/popupNotice")
 
-    async def get_notice(self) -> List[str]:
+    async def get_notice(self) -> str:
         return await self._request("GET", "/auth/notice")
 
     async def get_system_status(self) -> SystemStatus:
@@ -116,16 +117,16 @@ class AsyncMEFrpClient(BaseClient):
         data = await self._request("GET", "/auth/user/info")
         return UserInfo(**data)
 
+    async def get_frp_token(self) -> str:
+        data = await self._request("GET", "/auth/user/frpToken")
+        return data.get("token") if isinstance(data, dict) else data
+
     async def sign(self, captcha_token: str):
         return await self._request("POST", "/auth/user/sign", {"captchaToken": captcha_token})
 
     async def get_user_groups(self) -> List[UserGroup]:
         data = await self._request("GET", "/auth/user/groups")
         return [UserGroup(**g) for g in data]
-
-    async def get_frp_token(self) -> str:
-        data = await self._request("GET", "/auth/user/frpToken")
-        return data.get("frpToken") if isinstance(data, dict) else data
 
     async def reset_token(self, captcha_token: str):
         return await self._request("POST", "/auth/user/tokenReset", {"captchaToken": captcha_token})
@@ -170,21 +171,21 @@ class AsyncMEFrpClient(BaseClient):
         data = await self._request("GET", "/auth/node/list")
         return [Node(**n) for n in data]
 
-    async def get_node_status(self, node_id: int) -> NodeStatus:
-        data = await self._request("GET", "/auth/node/status", params={"nodeId": node_id})
-        return NodeStatus(**data)
-
     async def get_node_name_list(self) -> List[NodeNameListItem]:
         data = await self._request("GET", "/auth/node/nameList")
         return [NodeNameListItem(**n) for n in data]
+
+    async def get_node_status(self) -> List[NodeStatus]:
+        data = await self._request("GET", "/auth/node/status")
+        return [NodeStatus(**n) for n in data]
 
     async def get_node_token(self, node_id: int) -> str:
         data = await self._request("POST", "/auth/node/secret", {"nodeId": node_id})
         return data.get("token") if isinstance(data, dict) else data
 
-    async def get_free_port(self, node_id: int, proxy_type: str):
+    async def get_free_port(self, node_id: int, protocol: str):
         return await self._request(
-            "GET", "/auth/node/freePort", params={"nodeId": node_id, "proxyType": proxy_type}
+            "POST", "/auth/node/freePort", {"nodeId": node_id, "protocol": protocol}
         )
 
     # --- Ads API ---
@@ -240,7 +241,19 @@ class AsyncMEFrpClient(BaseClient):
 
     async def get_create_proxy_data(self) -> CreateProxyDataResponse:
         data = await self._request("GET", "/auth/createProxyData")
-        return CreateProxyDataResponse(**data)
+        nodes = []
+        # 获取 Node 类定义的字段，用于过滤后端返回的冗余字段
+        node_fields = {f.name for f in dataclasses.fields(Node)}
+        for n in data["nodes"]:
+            load_percent = n.pop("loadPercent", 0)
+            # 过滤掉不在 Node 定义中的字段
+            filtered_n = {k: v for k, v in n.items() if k in node_fields}
+            node_base = Node(**filtered_n)
+            nodes.append(NodeWithLoad(**node_base.__dict__, loadPercent=load_percent))
+        groups = [UserGroup(**g) for g in data["groups"]]
+        return CreateProxyDataResponse(
+            nodes=nodes, groups=groups, currentGroup=data["currentGroup"]
+        )
 
     # --- CDK API ---
     async def redeem_cdk(self, code: str):
